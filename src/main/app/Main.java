@@ -18,13 +18,18 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+
+        //меню настроек из fxml файла
         Parent root = FXMLLoader.load(getClass().getResource("/startMenu.fxml"));
-        primaryStage.setScene(new Scene(root));
+        //значок и название окна
         primaryStage.setTitle("Minesweeper");
         InputStream iconStream = getClass().getResourceAsStream("/icon.png");
         Image icon = new Image(iconStream);
         primaryStage.getIcons().add(icon);
+        //запуск окна с настройками
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
+
     }
 
 }
