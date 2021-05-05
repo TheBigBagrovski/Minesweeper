@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 public class Main extends Application {
 
@@ -20,11 +21,14 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws IOException {
 
         //меню настроек из fxml файла
-        Parent root = FXMLLoader.load(getClass().getResource("/startMenu.fxml"));
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/startMenu.fxml")));
         //значок и название окна
         primaryStage.setTitle("Minesweeper");
         InputStream iconStream = getClass().getResourceAsStream("/icon.png");
-        Image icon = new Image(iconStream);
+        Image icon = null;
+        if (iconStream != null) {
+            icon = new Image(iconStream);
+        }
         primaryStage.getIcons().add(icon);
         //запуск окна с настройками
         primaryStage.setScene(new Scene(root));

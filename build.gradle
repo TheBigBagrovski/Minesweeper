@@ -27,14 +27,27 @@ sourceSets {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testCompile 'org.testfx:testfx-core:4.0.16-alpha'
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testCompile 'org.testfx:testfx-junit5:4.0.16-alpha'
 }
 
 test {
     useJUnitPlatform()
     testLogging { events "passed", "skipped", "failed" }
 }
+
 javafx {
     version = "15.0.1"
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
-mainClassName = 'app.Main'
+
+mainClassName='app.Launcher'
+jar {
+    manifest {
+        attributes 'Main-Class': 'app.Launcher'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
