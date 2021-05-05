@@ -21,14 +21,13 @@ public class Game {
     public static final int TILE_SIZE_X = 25;
     public static final double TILE_SIZE_Y = 18.75;
     public static final double X_OFFSET = 12.5;
+    public static Tile[][] matrix;   //игровое поле
 
     private static int INPUT_WIDTH;
     private static int INPUT_HEIGHT;
     private static int INPUT_MINES_NUMBER;
 
     private final Stage game = new Stage();
-
-    private static Tile[][] matrix;   //игровое поле
     private static final Set<Tile> mines = new HashSet<>(); //ячейки с минами
     private static int flagsLeft; //количество мин, которые осталось закрыть флагом
     private static final Label flagsLeftField = new Label(); //поле с flagsLeft
@@ -52,7 +51,7 @@ public class Game {
     public void clickPlayButton() {
         if (!game.isShowing()) { //одна игра одновременно
             try { //ограничения на ввод: ширина [2..50], высота [2..40], мины [1..(ширина*высота-7)]
-                if (fieldHeight_input.getText().equals("") || fieldWidth_input.getText().equals("") || minesNumber_input.getText().equals(""))
+                if (fieldHeight_input.getText().isEmpty() || fieldWidth_input.getText().isEmpty() || minesNumber_input.getText().isEmpty())
                     throw new IllegalStateException("Error: fill all fields");
                 INPUT_WIDTH = Integer.parseInt(fieldWidth_input.getText());
                 INPUT_HEIGHT = Integer.parseInt(fieldHeight_input.getText());
@@ -73,7 +72,6 @@ public class Game {
     }
 
     private void startGame() {
-
         Pane root = new Pane();
         root.setPrefSize(17 + INPUT_WIDTH * TILE_SIZE_X, 10 + INPUT_HEIGHT * TILE_SIZE_Y + 20);
         matrix = new Tile[INPUT_HEIGHT][INPUT_WIDTH];
@@ -91,8 +89,9 @@ public class Game {
             } else offset = 0;
             for (int x = 0; x < INPUT_WIDTH; x++) {
                 Tile tile = new Tile(x, y);
-                root.getChildren().add(tile);
                 matrix[y][x] = tile;
+                tile.drawTile();
+                root.getChildren().add(tile);
             }
         }
         //добавление поля с оставшимися флагами
@@ -102,13 +101,15 @@ public class Game {
         //значок и название окна
         game.setTitle("Minesweeper");
         InputStream iconStream = getClass().getResourceAsStream("/icon.png");
-        Image icon = new Image(iconStream);
+        Image icon = null;
+        if (iconStream != null) {
+            icon = new Image(iconStream);
+        }
         game.getIcons().add(icon);
         //очистка поля для вывода ошибок в настройках при успешном запуске игры, запуск игры
         errorField.setText("");
         game.setScene(new Scene(root));
         game.show();
-
     }
 
     public static class Tile extends StackPane {
@@ -124,9 +125,11 @@ public class Game {
         private final Polygon border = new Polygon();
 
         public Tile(int x, int y) {
-
             this.y = y;
             this.x = x;
+        }
+
+        public void drawTile() {
             //формирование шестиугольника
             border.setRotate(90.0);
             border.getPoints().addAll(25.0, 6.25, 37.5, 6.25, 43.75, 18.75, 37.5, 31.25, 25.0, 31.25, 18.75, 18.75);
@@ -148,7 +151,6 @@ public class Game {
                         else open();
                     } else if (event.getButton() == MouseButton.SECONDARY) setFlag();
             });
-
         }
 
         public void setMine() {
@@ -340,7 +342,6 @@ public class Game {
             result = prime * result + x;
             result = prime * result + y;
             return result;
-
         }
 
     }

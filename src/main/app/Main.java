@@ -19,7 +19,6 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-
         //меню настроек из fxml файла
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/startMenu.fxml")));
         //значок и название окна
@@ -33,7 +32,6 @@ public class Main extends Application {
         //запуск окна с настройками
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
-
     }
 
 }
