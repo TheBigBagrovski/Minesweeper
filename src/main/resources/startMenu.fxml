@@ -8,8 +8,8 @@
 
 <AnchorPane prefHeight="250.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/15" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="app.Game">
-    <TextField fx:id="fieldWidth_input" layoutX="170.0" layoutY="76.0" prefHeight="15.0" prefWidth="60.0"/>
-    <TextField fx:id="fieldHeight_input" layoutX="170.0" layoutY="112.0" prefHeight="15.0" prefWidth="60.0"/>
+    <TextField fx:id="fieldWidth_input" layoutX="170.0" layoutY="76.0" prefHeight="15.0" prefWidth="60.0" onMouseClicked="#clickWidthTextField"/>
+    <TextField fx:id="fieldHeight_input" layoutX="170.0" layoutY="112.0" prefHeight="15.0" prefWidth="60.0" onMouseClicked="#clickHeightTextField"/>
     <TextField fx:id="minesNumber_input" layoutX="170.0" layoutY="149.0" prefHeight="15.0" prefWidth="60.0"/>
     <Label layoutX="58.0" layoutY="29.0" text="Настройки игры">
         <font>
