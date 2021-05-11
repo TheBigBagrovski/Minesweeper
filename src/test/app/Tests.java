@@ -24,7 +24,6 @@ public class Tests {
         Main.main(args);
         Game game = new Game(10, 10, 10);
         MatrixTile[][] testMatrix = game.getGameMatrix();
-
         clearExpectedActualLists();
         actual = testMatrix[0][0].getNeighbors(testMatrix);
         expected.add(testMatrix[1][0]);
