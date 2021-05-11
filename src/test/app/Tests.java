@@ -1,11 +1,11 @@
 package app;
 
+import app.Game.MatrixTile;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static app.Game.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Tests {
@@ -22,15 +22,9 @@ public class Tests {
     @Test
     public void test_getNeighbors() {
         Main.main(args);
-        fieldWidth_input.setText("10");
-        fieldHeight_input.setText("10");
-        minesNumber_input.setText("10");
-        MatrixTile[][] testMatrix = new MatrixTile[10][10];
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                testMatrix[i][j] = new MatrixTile(j, i);
-            }
-        }
+        Game game = new Game(10, 10, 10);
+        MatrixTile[][] testMatrix = game.getGameMatrix();
+
         clearExpectedActualLists();
         actual = testMatrix[0][0].getNeighbors(testMatrix);
         expected.add(testMatrix[1][0]);

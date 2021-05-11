@@ -1,17 +1,10 @@
 package app;
 
-import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
-import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+
+import static app.Interface.drawFlagsLeft;
 
 public class Game {
 
@@ -19,117 +12,270 @@ public class Game {
     public static final double TILE_SIZE_Y = 18.75;
     public static final double X_OFFSET = 12.5;
 
-    public static int INPUT_WIDTH;
-    public static int INPUT_HEIGHT;
-    public static int INPUT_MINES_NUMBER;
+    private final int inputWidth;
+    private final int inputHeight;
+    private final int inputMinesNumber;
 
-    public static MatrixTile[][] gameMatrix;   //игровое поле
-    public static InterfaceTile[][] gameField;
+    private final MatrixTile[][] gameMatrix;   //игровое поле
+    private final Interface.InterfaceTile[][] gameField;
 
-    private final Stage game = new Stage();
-    public static final Set<MatrixTile> mines = new HashSet<>(); //ячейки с минами
-    public static int flagsLeft; //количество мин, которые осталось закрыть флагом
-    public static final Label flagsLeftField = new Label(); //поле с flagsLeft
-    public static int tilesBeforeVictory; //кол-во клеток, которые надо открыть/поставить флаг до победы
-    public static boolean firstTileWasClicked; //проверка того, что была открыта первая клетка
-    public static boolean gameOver; //проверка окончания игры
+//    private final Stage gameStage = new Stage();
+    private final Set<MatrixTile> mines = new HashSet<>(); //ячейки с минами
+    private int flagsLeft; //количество мин, которые осталось закрыть флагом
+    private final Label flagsLeftField = new Label(); //поле с flagsLeft
+    private int tilesBeforeVictory; //кол-во клеток, которые надо открыть/поставить флаг до победы
+    private boolean firstTileWasClicked; //проверка того, что была открыта первая клетка
+    private boolean gameOver; //проверка окончания игры
 
-    @FXML
-    public static TextField fieldWidth_input = new TextField();
-
-    @FXML
-    public static TextField fieldHeight_input = new TextField();
-
-    @FXML
-    public static TextField minesNumber_input = new TextField();
-
-    @FXML
-    private Label errorField;
-
-    public void clickWidthTextField() {
-        fieldWidth_input.focusedProperty().addListener((arg0, oldValue, newValue) -> {
-            if (!newValue) { // when focus lost
-                if (!fieldWidth_input.getText().matches("^([2-9]|[1-4][\\d]|50)$")) {
-                    fieldWidth_input.setText("");
-                }
-            }
-        });
+    public boolean isGameOver() {
+        return gameOver;
     }
 
-    public void clickHeightTextField() {
-        fieldHeight_input.focusedProperty().addListener((arg0, oldValue, newValue) -> {
-            if (!newValue) { // when focus lost
-                if (!fieldHeight_input.getText().matches("^([2-9]|[1-3][\\d]|40)$")) {
-                    fieldHeight_input.setText("");
-                }
-            }
-        });
+    public boolean isFirstTileWasClicked() {
+        return firstTileWasClicked;
     }
 
-    public void clickPlayButton() {
-        if (!game.isShowing()) { //одна игра одновременно
-            if (fieldWidth_input.getText().isEmpty() || fieldHeight_input.getText().isEmpty()) {
-                errorField.setText("Error: fill all fields");
-                return;
-            }
-            INPUT_HEIGHT = Integer.parseInt(fieldHeight_input.getText());
-            INPUT_WIDTH = Integer.parseInt(fieldWidth_input.getText());
-            int minesNum;
-            try {
-                minesNum = Integer.parseInt(minesNumber_input.getText());
-            } catch (NumberFormatException e) {
-                errorField.setText("Error: wrong input");
-                return;
-            }
-            INPUT_MINES_NUMBER = minesNum;
-            if (minesNum < 1 || minesNum > INPUT_WIDTH * INPUT_HEIGHT - 7)
-                errorField.setText("Error: wrong mines number");
-            else startGame();
-        } else errorField.setText("Game has already started");
+    public MatrixTile[][] getGameMatrix() {
+        return gameMatrix;
     }
 
-    private void startGame() {
-        Pane root = new Pane();
-        root.setPrefSize(17 + INPUT_WIDTH * TILE_SIZE_X, 10 + INPUT_HEIGHT * TILE_SIZE_Y + 20);
-        gameMatrix = new MatrixTile[INPUT_HEIGHT][INPUT_WIDTH];
-        gameField = new InterfaceTile[INPUT_HEIGHT][INPUT_WIDTH];
-        mines.clear();
-        gameOver = false;
-        firstTileWasClicked = false;
-        tilesBeforeVictory = INPUT_WIDTH * INPUT_HEIGHT;
-        flagsLeft = INPUT_MINES_NUMBER;
-        flagsLeftField.setTextFill(Color.BLACK);
-        flagsLeftField.setText("Flags left: " + flagsLeft);
-        //формирование пустой матрицы и построение поля из ячеек
-        double offset;
-        for (int y = 0; y < INPUT_HEIGHT; y++) {
-            if (y % 2 != 0) {
-                offset = X_OFFSET;
-            } else offset = 0;
-            for (int x = 0; x < INPUT_WIDTH; x++) {
+    public Label getFlagsLeftField() {
+        return flagsLeftField;
+    }
+
+    public int getFlagsLeft() {
+        return flagsLeft;
+    }
+
+    public Interface.InterfaceTile[][] getGameField() {
+        return gameField;
+    }
+
+//    public Stage getGameStage() {
+//        return gameStage;
+//    }
+
+    public Game(int inputHeight, int inputWidth, int inputMinesNumber) {
+        this.inputHeight = inputHeight;
+        this.inputWidth = inputWidth;
+        this.inputMinesNumber = inputMinesNumber;
+
+        tilesBeforeVictory = inputWidth * inputHeight;
+        flagsLeft = inputMinesNumber;
+        gameField = new Interface.InterfaceTile[inputHeight][inputWidth];
+        gameMatrix = new MatrixTile[inputHeight][inputWidth];
+        for (int y = 0; y < inputHeight; y++) {
+            for (int x = 0; x < inputWidth; x++) {
                 gameMatrix[y][x] = new MatrixTile(x, y);
-                InterfaceTile tile = new InterfaceTile(x, y, offset);
-                gameField[y][x] = tile;
-                root.getChildren().add(tile);
-                gameField[y][x].drawTile();
             }
         }
-        //добавление поля с оставшимися флагами
-        flagsLeftField.setTranslateX(INPUT_WIDTH * TILE_SIZE_X / 2.0 - 23);
-        flagsLeftField.setTranslateY(INPUT_HEIGHT * TILE_SIZE_Y + 10);
-        root.getChildren().add(flagsLeftField);
-        //значок и название окна
-        game.setTitle("Minesweeper");
-        InputStream iconStream = getClass().getResourceAsStream("/icon.png");
-        Image icon = null;
-        if (iconStream != null) {
-            icon = new Image(iconStream);
+    }
+
+    public void endGame(boolean winOrLoss) {
+        gameOver = true;
+        if (winOrLoss) {
+            drawFlagsLeft(1, flagsLeftField, flagsLeft);
+        } else {
+            drawFlagsLeft(2, flagsLeftField, flagsLeft);
+            for (MatrixTile mine : mines) {
+                gameField[mine.y][mine.x].drawMine();
+            }
         }
-        game.getIcons().add(icon);
-        //очистка поля для вывода ошибок в настройках при успешном запуске игры, запуск игры
-        errorField.setText("");
-        game.setScene(new Scene(root));
-        game.show();
+    }
+
+    public class MatrixTile {
+
+        private final int x;
+        private final int y;
+
+        private boolean isMine;
+        private Integer minesAround = 0;
+        private boolean isOpen;
+        private boolean hasFlag;
+        private boolean firstTile;
+
+        public boolean hasFlag() {
+            return hasFlag;
+        }
+
+        public MatrixTile(int x, int y) {
+            this.y = y;
+            this.x = x;
+        }
+
+        public void openFirstTile() {
+            firstTileWasClicked = true;
+            gameMatrix[y][x].firstTile = true; //первая нажатая клетка и 6 вокруг нее помечаются, чтобы не поместить в них мину
+            for (MatrixTile tile : gameMatrix[y][x].getNeighbors(gameMatrix))
+                tile.firstTile = true; //и не проиграть на первом ход
+            //случайное заполнение mines
+            Random rnd = new Random(System.currentTimeMillis());
+            int a, b; //формирование множества случаных неповторяющихся клеток
+            while (mines.size() != inputMinesNumber) {
+                a = rnd.nextInt(inputHeight);
+                b = rnd.nextInt(inputWidth);
+                if (!gameMatrix[a][b].firstTile)    //мины не помещаются в первую нажатую клетку и вокруг нее
+                    mines.add(gameMatrix[a][b]);
+            }
+            for (MatrixTile tile : mines) {
+                gameMatrix[tile.y][tile.x].isMine = true;
+                for (MatrixTile neighbor : gameMatrix[tile.y][tile.x].getNeighbors(gameMatrix))
+                    neighbor.incMinesAround();
+            }
+            open();
+            for (MatrixTile tile : gameMatrix[y][x].getNeighbors(gameMatrix))
+                gameMatrix[tile.y][tile.x].open(); //на первом клике открываются минимум 7 клеток
+        }
+
+        public void open() {
+            if (gameMatrix[y][x].isOpen) return; //клик на уже открытую клетку
+            gameMatrix[y][x].isOpen = true;
+            if (gameMatrix[y][x].hasFlag) {     //не выполняется при клике мышкой
+                flagsLeft++;   //если открывается сразу несколько клеток, флаги с открывающихся клеток сбрасываются
+            }
+            if (gameMatrix[y][x].isMine) { //клик на мину
+                endGame(false);
+                return;
+            }
+            gameField[y][x].drawOpenTile(minesAround);
+            tilesBeforeVictory--;
+            if (tilesBeforeVictory == 0) endGame(true);
+            if (gameMatrix[y][x].minesAround == 0)
+                for (MatrixTile tile : gameMatrix[y][x].getNeighbors(gameMatrix))
+                    gameMatrix[tile.y][tile.x].open();
+        }
+
+        public void setFlag() {
+            if (gameMatrix[y][x].isOpen) return; //установка флага на открытую клетку
+            if (gameMatrix[y][x].hasFlag()) { //удаление флага
+                gameMatrix[y][x].hasFlag = false;
+                flagsLeft++;
+                tilesBeforeVictory++;
+                gameField[y][x].drawRemoveFlag();
+                return;
+            }
+            gameMatrix[y][x].hasFlag = true;
+            tilesBeforeVictory--;
+            flagsLeft--;
+            drawFlagsLeft(0, flagsLeftField, flagsLeft);
+            gameField[y][x].drawSetFlag();
+            if (tilesBeforeVictory == 0) endGame(true);
+        }
+
+        private void incMinesAround() {
+            minesAround++;
+        }
+
+        List<MatrixTile> getNeighbors(MatrixTile[][] matrix) {
+            List<MatrixTile> list = new ArrayList<>();
+            if (y == 0) { //если первая строка в матрице
+                if (x == 0) { //начало строки
+                    list.add(matrix[1][0]);
+                    list.add(matrix[0][1]);
+                } else if (x == matrix[0].length - 1) { //конец строки
+                    list.add(matrix[0][x - 1]);
+                    list.add(matrix[1][x - 1]);
+                    list.add(matrix[1][x]);
+                } else { //остальная часть строки
+                    list.add(matrix[0][x - 1]);
+                    list.add(matrix[0][x + 1]);
+                    list.add(matrix[1][x - 1]);
+                    list.add(matrix[1][x]);
+                }
+            } else if (y % 2 == 0) { //если строка четная
+                if (y == matrix.length - 1) { //если последняя строка
+                    if (x == 0) {       //если первая клетка в строке
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y][x + 1]);
+                    } else if (x == matrix[0].length - 1) { //последняя клетка в строке
+                        list.add(matrix[y - 1][x - 1]);
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y][x - 1]);
+                    } else {            //остальные клетки
+                        list.add(matrix[y - 1][x - 1]);
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y][x - 1]);
+                        list.add(matrix[y][x + 1]);
+                    }
+                } else {   //если не последняя строка
+                    if (x == 0) {
+                        list.add(matrix[y - 1][0]);
+                        list.add(matrix[y][1]);
+                        list.add(matrix[y + 1][0]);
+                    } else if (x == matrix[0].length - 1) {
+                        list.add(matrix[y - 1][x - 1]);
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y][x - 1]);
+                        list.add(matrix[y + 1][x - 1]);
+                        list.add(matrix[y + 1][x]);
+                    } else {
+                        list.add(matrix[y - 1][x - 1]);
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y][x - 1]);
+                        list.add(matrix[y][x + 1]);
+                        list.add(matrix[y + 1][x - 1]);
+                        list.add(matrix[y + 1][x]);
+                    }
+                }
+            } else {
+                if (y == matrix.length - 1) {
+                    if (x == 0) {
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y - 1][x + 1]);
+                        list.add(matrix[y][x + 1]);
+                    } else if (x == matrix[0].length - 1) {
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y][x - 1]);
+                    } else {
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y - 1][x + 1]);
+                        list.add(matrix[y][x - 1]);
+                        list.add(matrix[y][x + 1]);
+                    }
+                } else {
+                    if (x == 0) {
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y - 1][x + 1]);
+                        list.add(matrix[y][x + 1]);
+                        list.add(matrix[y + 1][x]);
+                        list.add(matrix[y + 1][x + 1]);
+                    } else if (x == matrix[0].length - 1) {
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y][x - 1]);
+                        list.add(matrix[y + 1][x]);
+                    } else {
+                        list.add(matrix[y - 1][x]);
+                        list.add(matrix[y - 1][x + 1]);
+                        list.add(matrix[y][x - 1]);
+                        list.add(matrix[y][x + 1]);
+                        list.add(matrix[y + 1][x]);
+                        list.add(matrix[y + 1][x + 1]);
+                    }
+                }
+            }
+            return list;
+        } //определение соседей клетки
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (obj instanceof MatrixTile) {
+                MatrixTile other = (MatrixTile) obj;
+                return this.x == other.x && this.y == other.y;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + x;
+            result = prime * result + y;
+            return result;
+        }
+
     }
 
 }
