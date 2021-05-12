@@ -8,10 +8,6 @@ import static app.Interface.drawFlagsLeft;
 
 public class Game {
 
-    public static final int TILE_SIZE_X = 25;
-    public static final double TILE_SIZE_Y = 18.75;
-    public static final double X_OFFSET = 12.5;
-
     private final int inputWidth;
     private final int inputHeight;
     private final int inputMinesNumber;
@@ -19,7 +15,6 @@ public class Game {
     private final MatrixTile[][] gameMatrix;   //игровое поле
     private final Interface.InterfaceTile[][] gameField;
 
-//    private final Stage gameStage = new Stage();
     private final Set<MatrixTile> mines = new HashSet<>(); //ячейки с минами
     private int flagsLeft; //количество мин, которые осталось закрыть флагом
     private final Label flagsLeftField = new Label(); //поле с flagsLeft
@@ -27,12 +22,20 @@ public class Game {
     private boolean firstTileWasClicked; //проверка того, что была открыта первая клетка
     private boolean gameOver; //проверка окончания игры
 
+    public Set<MatrixTile> getMines() {
+        return mines;
+    }
+
     public boolean isGameOver() {
         return gameOver;
     }
 
     public boolean isFirstTileWasClicked() {
         return firstTileWasClicked;
+    }
+
+    public void setFirstTileWasClicked(boolean firstTileWasClicked) {
+        this.firstTileWasClicked = firstTileWasClicked;
     }
 
     public MatrixTile[][] getGameMatrix() {
@@ -50,10 +53,6 @@ public class Game {
     public Interface.InterfaceTile[][] getGameField() {
         return gameField;
     }
-
-//    public Stage getGameStage() {
-//        return gameStage;
-//    }
 
     public Game(int inputHeight, int inputWidth, int inputMinesNumber) {
         this.inputHeight = inputHeight;
@@ -94,6 +93,14 @@ public class Game {
         private boolean hasFlag;
         private boolean firstTile;
 
+        public Integer getMinesAround() {
+            return minesAround;
+        }
+
+        public void setMine() {
+            isMine = true;
+        }
+
         public boolean hasFlag() {
             return hasFlag;
         }
@@ -128,6 +135,8 @@ public class Game {
         }
 
         public void open() {
+            if (!isFirstTileWasClicked())
+                openFirstTile();
             if (gameMatrix[y][x].isOpen) return; //клик на уже открытую клетку
             gameMatrix[y][x].isOpen = true;
             if (gameMatrix[y][x].hasFlag) {     //не выполняется при клике мышкой
@@ -152,6 +161,7 @@ public class Game {
                 flagsLeft++;
                 tilesBeforeVictory++;
                 gameField[y][x].drawRemoveFlag();
+                drawFlagsLeft(0, flagsLeftField, flagsLeft);
                 return;
             }
             gameMatrix[y][x].hasFlag = true;
@@ -162,7 +172,7 @@ public class Game {
             if (tilesBeforeVictory == 0) endGame(true);
         }
 
-        private void incMinesAround() {
+        public void incMinesAround() {
             minesAround++;
         }
 

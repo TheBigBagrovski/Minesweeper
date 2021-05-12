@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 
 import java.io.InputStream;
 
-import static app.Game.*;
+import static app.Interface.*;
 
 public class Menu {
 
@@ -27,28 +27,20 @@ public class Menu {
     @FXML
     private Label errorField;
 
+    private void setValidator(TextField textField) {
+        textField.focusedProperty().addListener((arg0, oldValue, newValue) -> {
+            if (!newValue) { // when focus lost
+                if (!textField.getText().matches("\\d*")) {
+                    textField.setText("");
+                }
+            }
+        });
+    }
+
     public void clickTextField() {
-        inputField_width.focusedProperty().addListener((arg0, oldValue, newValue) -> {
-            if (!newValue) { // when focus lost
-                if (!inputField_width.getText().matches("\\d*")) {
-                    inputField_width.setText("");
-                }
-            }
-        });
-        inputField_height.focusedProperty().addListener((arg0, oldValue, newValue) -> {
-            if (!newValue) { // when focus lost
-                if (!inputField_height.getText().matches("\\d*")) {
-                    inputField_height.setText("");
-                }
-            }
-        });
-        inputField_mines.focusedProperty().addListener((arg0, oldValue, newValue) -> {
-            if (!newValue) { // when focus lost
-                if (!inputField_mines.getText().matches("\\d*")) {
-                    inputField_mines.setText("");
-                }
-            }
-        });
+        setValidator(inputField_height);
+        setValidator(inputField_width);
+        setValidator(inputField_mines);
     }
 
     public void clickPlayButton() {

@@ -7,10 +7,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 
-import static app.Game.TILE_SIZE_X;
-import static app.Game.TILE_SIZE_Y;
-
 public class Interface {
+
+    public static final int TILE_SIZE_X = 25;
+    public static final double TILE_SIZE_Y = 18.75;
+    public static final double X_OFFSET = 12.5;
 
     public static void drawFlagsLeft(int a, Label flagsLeftField, int flagsLeft) {
         switch (a) {
@@ -35,6 +36,10 @@ public class Interface {
         private final Polygon border = new Polygon();
         private final Game game;
 
+        public String getText() {
+            return text.getText();
+        }
+
         public InterfaceTile(int x, int y, double offset, Game game) {
             this.y = y;
             this.x = x;
@@ -55,22 +60,16 @@ public class Interface {
                 if (!game.isGameOver())
                     if (event.getButton() == MouseButton.PRIMARY) {
                         if (game.getGameMatrix()[y][x].hasFlag()) return;
-                        if (!game.isFirstTileWasClicked())
-                            clickOpenFirstTile();
-                        else clickOpen();
+                        clickOpen();
                     } else if (event.getButton() == MouseButton.SECONDARY) clickSetFlag();
             });
-        }
-
-        private void clickOpenFirstTile() {
-            game.getGameMatrix()[y][x].openFirstTile();
         }
 
         private void clickOpen() {
             game.getGameMatrix()[y][x].open();
         }
 
-        private void clickSetFlag() {
+        public void clickSetFlag() {
             game.getGameMatrix()[y][x].setFlag();
         }
 
