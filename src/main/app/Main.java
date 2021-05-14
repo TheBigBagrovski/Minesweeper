@@ -13,6 +13,12 @@ import java.util.Objects;
 
 public class Main extends Application {
 
+    public Parent getRoot() {
+        return root;
+    }
+
+    private Parent root;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -20,7 +26,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
         //меню настроек из fxml файла
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/startMenu.fxml")));
+        root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/startMenu.fxml")));
         //значок и название окна
         primaryStage.setTitle("Minesweeper");
         InputStream iconStream = getClass().getResourceAsStream("/icon.png");

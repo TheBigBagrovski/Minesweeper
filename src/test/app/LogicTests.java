@@ -2,7 +2,6 @@ package app;
 
 import app.Game.MatrixTile;
 import javafx.scene.paint.Color;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -10,28 +9,19 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Tests {
-
-    private static final String[] args = new String[]{""};
-
-    @BeforeAll
-    static void starting() {
-        Main.main(args);
-    }
+public class LogicTests extends TestFXBase{
 
     @Test
     public void test_setFlag() {
         Game game = new Game(10, 10, 1);
+        Interface gameInterface = new Interface(10, 10, game);
         MatrixTile[][] testMatrix = game.getGameMatrix();
-        Interface.InterfaceTile[][] gameField = game.getGameField();
-        for (int i = 0; i < 10; i++)
-            for (int j = 0; j < 10; j++)
-                gameField[i][j] = new Interface.InterfaceTile(i, j, 0, game);
+        Interface.InterfaceTile[][] gameField = gameInterface.getGameField();
         testMatrix[0][0].setMine();
         game.getMines().add(testMatrix[0][0]);
-        testMatrix[0][1].setFlag();
+        testMatrix[0][1].setFlag(gameInterface);
         assertEquals("F", gameField[0][1].getText());
-        testMatrix[0][0].open();
+        testMatrix[0][0].open(gameInterface);
         assertEquals("X", gameField[0][0].getText());
     }
 
@@ -64,16 +54,14 @@ public class Tests {
     public void test_gameOverWin() {
         Game game = new Game(10, 10, 1);
         MatrixTile[][] testMatrix = game.getGameMatrix();
-        Interface.InterfaceTile[][] gameField = game.getGameField();
+        Interface gameInterface = new Interface(10, 10, game);
+        Interface.InterfaceTile[][] gameField = gameInterface.getGameField();
         testMatrix[0][0].setMine();
-        for (int i = 0; i < 10; i++)
-            for (int j = 0; j < 10; j++)
-                gameField[i][j] = new Interface.InterfaceTile(i, j, 0, game);
         game.setFirstTileWasClicked(true);
         gameField[0][0].clickSetFlag();
-        testMatrix[5][5].open();
-        String actualText = game.getFlagsLeftField().getText();
-        javafx.scene.paint.Color actualColor = (javafx.scene.paint.Color) game.getFlagsLeftField().getTextFill();
+        testMatrix[5][5].open(gameInterface);
+        String actualText = gameInterface.getFlagsLeftField().getText();
+        javafx.scene.paint.Color actualColor = (javafx.scene.paint.Color) gameInterface.getFlagsLeftField().getTextFill();
         javafx.scene.paint.Color expectedColor = Color.GREEN;
         String expectedText = "YOU WON!";
         assertEquals(actualText, expectedText);
@@ -84,11 +72,12 @@ public class Tests {
     public void test_gameOverLose() {
         Game game = new Game(10, 10, 1);
         MatrixTile[][] testMatrix = game.getGameMatrix();
+        Interface gameInterface = new Interface(10, 10, game);
         testMatrix[0][0].setMine();
         game.setFirstTileWasClicked(true);
-        testMatrix[0][0].open();
-        String actualText = game.getFlagsLeftField().getText();
-        javafx.scene.paint.Color actualColor = (javafx.scene.paint.Color) game.getFlagsLeftField().getTextFill();
+        testMatrix[0][0].open(gameInterface);
+        String actualText = gameInterface.getFlagsLeftField().getText();
+        javafx.scene.paint.Color actualColor = (javafx.scene.paint.Color) gameInterface.getFlagsLeftField().getTextFill();
         javafx.scene.paint.Color expectedColor = Color.RED;
         String expectedText = "YOU LOSE!";
         assertEquals(actualText, expectedText);

@@ -18,6 +18,6 @@
     <Label layoutX="23.0" layoutY="79.0" prefHeight="18.0" prefWidth="115.0" text="Ширина (в ячейках)" />
     <Label layoutX="23.0" layoutY="116.0" prefHeight="18.0" prefWidth="115.0" text="Высота (в ячейках)" />
     <Label layoutX="23.0" layoutY="152.0" prefHeight="18.0" prefWidth="95.0" text="Количество мин" />
-    <Button layoutX="98.0" layoutY="196.0" mnemonicParsing="false" onAction="#clickPlayButton" text="Играть" />
+    <Button fx:id="playButton" layoutX="98.0" layoutY="196.0" mnemonicParsing="false" onAction="#clickPlayButton" text="Играть" />
     <Label fx:id="errorField" alignment="CENTER" contentDisplay="CENTER" layoutX="38.0" layoutY="227.0" prefHeight="18.0" prefWidth="174.0" textAlignment="CENTER" textFill="#d90c0c" />
 </AnchorPane>

@@ -5,13 +5,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.InputStream;
-
-import static app.Interface.*;
 
 public class Menu {
 
@@ -60,25 +56,8 @@ public class Menu {
 
     private void startGame(int height, int width, int minesNumber) {
         Game game = new Game(height, width, minesNumber);
+        Interface gameInterface = new Interface(height, width, game);
         Stage stage = new Stage();
-        Pane root = new Pane();
-        root.setPrefSize(17 + width * TILE_SIZE_X, 10 + height * TILE_SIZE_Y + 20);
-        game.getFlagsLeftField().setText("Flags left: " + game.getFlagsLeft());
-        game.getFlagsLeftField().setTextFill(Color.BLACK);
-        double offset;
-        for (int y = 0; y < height; y++) {
-            if (y % 2 != 0) {
-                offset = X_OFFSET;
-            } else offset = 0;
-            for (int x = 0; x < width; x++) {
-                Interface.InterfaceTile tile = new Interface.InterfaceTile(x, y, offset, game);
-                game.getGameField()[y][x] = tile;
-                root.getChildren().add(tile);
-            }
-        }
-        game.getFlagsLeftField().setTranslateX(width * TILE_SIZE_X / 2.0 - 23);
-        game.getFlagsLeftField().setTranslateY(height * TILE_SIZE_Y + 10);
-        root.getChildren().add(game.getFlagsLeftField());
         //значок и название окна
         stage.setTitle("Minesweeper");
         InputStream iconStream = getClass().getResourceAsStream("/icon.png");
@@ -89,7 +68,7 @@ public class Menu {
         stage.getIcons().add(icon);
         //очистка поля для вывода ошибок в настройках при успешном запуске игры, запуск игры
         errorField.setText("");
-        stage.setScene(new Scene(root));
+        stage.setScene(new Scene(gameInterface.getRoot()));
         stage.show();
     }
 
