@@ -15,7 +15,7 @@ public class InterfaceTests extends TestFXBase {
     final String INPUT_HEIGHT_ID = "#inputField_height";
     final String INPUT_MINES_ID = "#inputField_mines";
     final String ERROR_EMPTY_FIELDS = "Error: fill all fields";
-    final String ERROR_MIN_SIZE = "Error: min field size is 2x2";
+    final String ERROR_MIN_SIZE = "Error: min field size is 3x3";
     final String ERROR_MAX_SIZE = "Error: max field size is 40x50";
     final String ERROR_MINES_NUMBER = "Error: wrong mines number";
     final String INVALID_SYMBOLS = "symbols";
@@ -38,8 +38,8 @@ public class InterfaceTests extends TestFXBase {
     public void emptyFields() {
         clickOn(PLAY_BUTTON_ID);
         verifyThat(ERROR_FIELD_ID, (Label label) -> {
-           String text = label.getText();
-           return text.contains(ERROR_EMPTY_FIELDS);
+            String text = label.getText();
+            return text.contains(ERROR_EMPTY_FIELDS);
         });
     }
 
@@ -103,15 +103,5 @@ public class InterfaceTests extends TestFXBase {
             return text.contains(ERROR_MINES_NUMBER);
         });
     }
-//
-//    @Test
-//    public void test() throws Exception {
-//        setUpClass();
-//        clickOn(INPUT_WIDTH_ID).write(VALID_NUMBER);
-//        clickOn(INPUT_HEIGHT_ID).write(VALID_NUMBER);
-//        clickOn(INPUT_MINES_ID).write(VALID_NUMBER);
-//        clickOn(PLAY_BUTTON_ID);
-//        sleep(500);
-//    }
 
 }

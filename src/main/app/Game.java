@@ -2,8 +2,6 @@ package app;
 
 import java.util.*;
 
-import static app.Interface.drawFlagsLeft;
-
 public class Game {
 
     private final int inputWidth;
@@ -17,6 +15,11 @@ public class Game {
     private int tilesBeforeVictory; //кол-во клеток, которые надо открыть/поставить флаг до победы
     private boolean firstTileWasClicked; //проверка того, что была открыта первая клетка
     private boolean gameOver; //проверка окончания игры
+    private boolean victory;
+
+    public boolean isVictory() {
+        return victory;
+    }
 
     public Set<MatrixTile> getMines() {
         return mines;
@@ -28,10 +31,6 @@ public class Game {
 
     public boolean isFirstTileWasClicked() {
         return firstTileWasClicked;
-    }
-
-    public void setFirstTileWasClicked(boolean firstTileWasClicked) {
-        this.firstTileWasClicked = firstTileWasClicked;
     }
 
     public MatrixTile[][] getGameMatrix() {
@@ -57,22 +56,9 @@ public class Game {
         }
     }
 
-    public void endGame(boolean winOrLoss, Interface gameInterface) {
+    public void endGame(boolean winOrLoss) {
         gameOver = true;
-        if (winOrLoss) {
-            drawFlagsLeft(1, gameInterface.getFlagsLeftField(), flagsLeft);
-        } else {
-            drawFlagsLeft(2, gameInterface.getFlagsLeftField(), flagsLeft);
-            for (int i = 0; i < gameMatrix.length; i++) {
-                for (int j = 0; j < gameMatrix[0].length; j++) {
-                    if (!gameMatrix[i][j].hasFlag && !gameMatrix[i][j].isOpen)
-                        gameInterface.getGameField()[i][j].getHitBox().setInactive();
-                }
-            }
-            for (MatrixTile mine : mines) {
-                gameInterface.getGameField()[mine.y][mine.x].drawMine();
-            }
-        }
+        victory = winOrLoss;
     }
 
     public class MatrixTile {
@@ -86,8 +72,20 @@ public class Game {
         private boolean hasFlag;
         private boolean firstTile;
 
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
         public Integer getMinesAround() {
             return minesAround;
+        }
+
+        public boolean isOpen() {
+            return isOpen;
         }
 
         public void setMine() {
@@ -103,7 +101,7 @@ public class Game {
             this.x = x;
         }
 
-        public void openFirstTile(Interface gameInterface) {
+        public void openFirstTile() {
             firstTileWasClicked = true;
             gameMatrix[y][x].firstTile = true; //первая нажатая клетка и 6 вокруг нее помечаются, чтобы не поместить в них мину
             for (MatrixTile tile : gameMatrix[y][x].getNeighbors(gameMatrix))
@@ -122,47 +120,44 @@ public class Game {
                 for (MatrixTile neighbor : gameMatrix[tile.y][tile.x].getNeighbors(gameMatrix))
                     neighbor.incMinesAround();
             }
-            open(gameInterface);
+            open();
             for (MatrixTile tile : gameMatrix[y][x].getNeighbors(gameMatrix))
-                gameMatrix[tile.y][tile.x].open(gameInterface); //на первом клике открываются минимум 7 клеток
+                gameMatrix[tile.y][tile.x].open(); //на первом клике открываются минимум 7 клеток
         }
 
-        public void open(Interface gameInterface) {
+        public void open() {
             if (!isFirstTileWasClicked())
-                openFirstTile(gameInterface);
+                openFirstTile();
             if (gameMatrix[y][x].isOpen) return; //клик на уже открытую клетку
             gameMatrix[y][x].isOpen = true;
             if (gameMatrix[y][x].hasFlag) {     //не выполняется при клике мышкой
-                flagsLeft++;   //если открывается сразу несколько клеток, флаги с открывающихся клеток сбрасываются
+                flagsLeft++;
+                tilesBeforeVictory++;
+                gameMatrix[y][x].hasFlag = false;   //если открывается сразу несколько клеток, флаги с открывающихся клеток сбрасываются
             }
             if (gameMatrix[y][x].isMine) { //клик на мину
-                endGame(false, gameInterface);
+                endGame(false);
                 return;
             }
-            gameInterface.getGameField()[y][x].drawOpenTile();
             tilesBeforeVictory--;
-            if (tilesBeforeVictory == 0) endGame(true, gameInterface);
+            if (tilesBeforeVictory == 0 && flagsLeft == 0) endGame(true);
             if (gameMatrix[y][x].minesAround == 0)
                 for (MatrixTile tile : gameMatrix[y][x].getNeighbors(gameMatrix))
-                    gameMatrix[tile.y][tile.x].open(gameInterface);
+                    gameMatrix[tile.y][tile.x].open();
         }
 
-        public void setFlag(Interface gameInterface) {
+        public void setFlag() {
             if (gameMatrix[y][x].isOpen) return; //установка флага на открытую клетку
             if (gameMatrix[y][x].hasFlag()) { //удаление флага
                 gameMatrix[y][x].hasFlag = false;
                 flagsLeft++;
                 tilesBeforeVictory++;
-                gameInterface.getGameField()[y][x].drawRemoveFlag();
-                drawFlagsLeft(0, gameInterface.getFlagsLeftField(), flagsLeft);
                 return;
             }
             gameMatrix[y][x].hasFlag = true;
             tilesBeforeVictory--;
             flagsLeft--;
-            drawFlagsLeft(0, gameInterface.getFlagsLeftField(), flagsLeft);
-            gameInterface.getGameField()[y][x].drawSetFlag();
-            if (tilesBeforeVictory == 0) endGame(true, gameInterface);
+            if (tilesBeforeVictory == 0 && flagsLeft == 0) endGame(true);
         }
 
         public void incMinesAround() {

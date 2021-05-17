@@ -47,7 +47,7 @@ public class Menu {
         int inputHeight = Integer.parseInt(inputField_height.getText());
         int inputWidth = Integer.parseInt(inputField_width.getText());
         int inputMinesNumber = Integer.parseInt(inputField_mines.getText());
-        if (inputHeight < 2 || inputWidth < 2) errorField.setText("Error: min field size is 2x2");
+        if (inputHeight < 2 || inputWidth < 2) errorField.setText("Error: min field size is 3x3");
         else if (inputWidth > 50 || inputHeight > 40) errorField.setText("Error: max field size is 40x50");
         else if (inputMinesNumber < 1 || inputMinesNumber > inputWidth * inputHeight - 7)
             errorField.setText("Error: wrong mines number");

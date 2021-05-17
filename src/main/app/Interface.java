@@ -55,28 +55,41 @@ public class Interface {
         root.getChildren().add(flagsLeftField);
     }
 
-    public static void drawFlagsLeft(int a, Label flagsLeftField, int flagsLeft) {
-        switch (a) {
-            case 0 -> flagsLeftField.setText("Flags left: " + flagsLeft);
-            case 1 -> {
-                flagsLeftField.setText("YOU WON!");
-                flagsLeftField.setTextFill(Color.GREEN);
+    public void drawVictory() {
+        flagsLeftField.setText("YOU WON!");
+        flagsLeftField.setTextFill(Color.GREEN);
+    }
+
+    public void drawLoss() {
+        flagsLeftField.setText("YOU LOSE!");
+        flagsLeftField.setTextFill(Color.RED);
+        for (int i = 0; i < gameField.length; i++) {
+            for (int j = 0; j < gameField[0].length; j++) {
+                if (!game.getGameMatrix()[i][j].hasFlag() && !game.getGameMatrix()[i][j].isOpen())
+                    gameField[i][j].getHitBox().setInactive();
             }
-            case 2 -> {
-                flagsLeftField.setText("YOU LOSE!");
-                flagsLeftField.setTextFill(Color.RED);
-            }
+        }
+        for (Game.MatrixTile mine : game.getMines()) {
+            gameField[mine.getY()][mine.getX()].drawTile(InterfaceTile.TileStatus.MINE);
         }
     }
 
-    public class InterfaceTile extends StackPane {
+    public static class InterfaceTile extends StackPane {
 
         private final int x;
         private final int y;
+        private final Game game;
         private final Interface parentInterface;
         private final Text text = new Text("");
         private final Polygon border = new Polygon();
-        private final HitBox hitBox;
+        private final HitBox hitBox = new HitBox();
+
+        private enum TileStatus {
+            EMPTY,
+            OPEN,
+            FLAG,
+            MINE
+        }
 
         public HitBox getHitBox() {
             return hitBox;
@@ -90,11 +103,11 @@ public class Interface {
             this.y = y;
             this.x = x;
             this.parentInterface = parentInterface;
+            this.game = parentInterface.game;
             //формирование шестиугольника
             border.setRotate(90.0);
             border.getPoints().addAll(25.0, 6.25, 37.5, 6.25, 43.75, 18.75, 37.5, 31.25, 25.0, 31.25, 18.75, 18.75);
             //цвет текста, рамки и самой ячейки
-            border.setFill(Color.GRAY);
             border.setStroke(Color.BLACK);
             text.setFill(Color.BLACK);
             getChildren().addAll(border, text);
@@ -102,41 +115,69 @@ public class Interface {
             setTranslateX(offset + x * TILE_SIZE_X);
             setTranslateY(y * TILE_SIZE_Y);
             //создание хитбокса
-            hitBox = new HitBox();
             hitBox.setActive();
             this.getChildren().add(hitBox);
+            drawTile(TileStatus.EMPTY);
         }
 
-
-        private void clickOpen() {
-            game.getGameMatrix()[y][x].open(parentInterface);
+        public void clickOpen() {
+            game.getGameMatrix()[y][x].open();
+            drawAllTiles();
+            parentInterface.getFlagsLeftField().setText("Flags left: " + game.getFlagsLeft());
+            checkEndGame();
         }
 
         public void clickSetFlag() {
-            game.getGameMatrix()[y][x].setFlag(parentInterface);
+            if (game.getGameMatrix()[y][x].hasFlag()) drawTile(TileStatus.EMPTY);
+            else drawTile(TileStatus.FLAG);
+            game.getGameMatrix()[y][x].setFlag();
+            parentInterface.getFlagsLeftField().setText("Flags left: " + game.getFlagsLeft());
+            checkEndGame();
         }
 
-        public void drawMine() {
-            border.setFill(Color.RED);
-            text.setText("X");
-            hitBox.setInactive();
+        public void checkEndGame() {
+            if (game.isGameOver()) {
+                if (game.isVictory()) parentInterface.drawVictory();
+                else parentInterface.drawLoss();
+            }
         }
 
-        public void drawOpenTile() {
-            border.setFill(Color.WHITE);
-            text.setText(game.getGameMatrix()[this.y][this.x].getMinesAround().toString());
-            hitBox.setInactive();
+        public void drawAllTiles() {
+            for (int i = 0; i < parentInterface.getGameField().length; i++) {
+                for (int j = 0; j < parentInterface.getGameField()[0].length; j++) {
+                    Game.MatrixTile[][] matrix = game.getGameMatrix();
+                    TileStatus status;
+                    if (matrix[i][j].hasFlag()) status = TileStatus.FLAG;
+                    else if (matrix[i][j].isOpen()) status = TileStatus.OPEN;
+                    else status = TileStatus.EMPTY;
+                    parentInterface.getGameField()[i][j].drawTile(status);
+                }
+            }
         }
 
-        public void drawSetFlag() {
-            text.setText("F");
-            border.setFill(Color.GRAY);
-            hitBox.setInactive();
-        }
-
-        public void drawRemoveFlag() {
-            text.setText("");
-            hitBox.setActive();
+        public void drawTile(TileStatus status) {
+            switch (status) {
+                case EMPTY -> {
+                    text.setText("");
+                    border.setFill(Color.GRAY);
+                    hitBox.setActive();
+                }
+                case OPEN -> {
+                    border.setFill(Color.WHITE);
+                    text.setText(game.getGameMatrix()[this.y][this.x].getMinesAround().toString());
+                    hitBox.setInactive();
+                }
+                case FLAG -> {
+                    text.setText("F");
+                    border.setFill(Color.GRAY);
+                    hitBox.setInactive();
+                }
+                case MINE -> {
+                    border.setFill(Color.RED);
+                    text.setText("X");
+                    hitBox.setInactive();
+                }
+            }
         }
 
         public class HitBox extends Rectangle {
@@ -152,7 +193,7 @@ public class Interface {
                         if (event.getButton() == MouseButton.PRIMARY) {
                             if (game.getGameMatrix()[y][x].hasFlag()) return;
                             clickOpen();
-                        } else if (event.getButton() == MouseButton.SECONDARY) clickSetFlag();
+                        } else if (event.getButton() == MouseButton.SECONDARY && !game.getGameMatrix()[y][x].isOpen()) clickSetFlag();
                 });
             }
 
