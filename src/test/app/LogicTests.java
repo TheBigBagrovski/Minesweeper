@@ -53,9 +53,12 @@ public class LogicTests {
 
     @Test
     public void test_gameOverWin() {
-        testMatrix[5][5].open();
-        for (MatrixTile mine : game.getMines()) {
-            testMatrix[mine.getY()][mine.getX()].setFlag();
+        game = new Game(10, 10, 93);
+        testMatrix = game.getGameMatrix();
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++)
+                if (testMatrix[i][j].isMine()) testMatrix[i][j].setFlag();
+                else testMatrix[i][j].open();
         }
         assertTrue(game.isGameOver());
         assertTrue(game.isVictory());

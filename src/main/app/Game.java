@@ -80,6 +80,10 @@ public class Game {
             return y;
         }
 
+        public boolean isMine() {
+            return isMine;
+        }
+
         public Integer getMinesAround() {
             return minesAround;
         }
