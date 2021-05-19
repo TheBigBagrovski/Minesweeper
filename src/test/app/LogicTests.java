@@ -9,7 +9,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LogicTests extends TestFXBase {
+public class LogicTests {
 
     Game game;
     MatrixTile[][] testMatrix;
