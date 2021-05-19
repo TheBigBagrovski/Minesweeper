@@ -1,6 +1,7 @@
 package app;
 
 import app.Game.MatrixTile;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -10,24 +11,25 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class LogicTests extends TestFXBase {
 
+    Game game;
+    MatrixTile[][] testMatrix;
+
+    @BeforeEach
+    private void before() {
+        game = new Game(10, 10, 1);
+        testMatrix = game.getGameMatrix();
+    }
+
     @Test
     public void test_setFlag() {
-        Game game = new Game(10, 10, 1);
-        Interface gameInterface = new Interface(10, 10, game);
-        MatrixTile[][] testMatrix = game.getGameMatrix();
-        Interface.InterfaceTile[][] gameField = gameInterface.getGameField();
-        testMatrix[0][0].setMine();
-        game.getMines().add(testMatrix[0][0]);
-        gameInterface.getGameField()[0][1].clickSetFlag();
-        assertEquals("F", gameField[0][1].getText());
-        gameInterface.getGameField()[0][0].clickOpen();
-        assertEquals("X", gameField[0][0].getText());
+        testMatrix[0][0].setFlag();
+        assertTrue(testMatrix[0][0].hasFlag());
+        testMatrix[0][0].setFlag();
+        assertFalse(testMatrix[0][0].hasFlag());
     }
 
     @Test
     public void test_minesAround() {
-        Game game = new Game(10, 10, 1);
-        MatrixTile[][] testMatrix = game.getGameMatrix();
         game.getMines().add(testMatrix[0][0]);
         game.getMines().add(testMatrix[0][9]);
         game.getMines().add(testMatrix[0][8]);
@@ -51,8 +53,6 @@ public class LogicTests extends TestFXBase {
 
     @Test
     public void test_gameOverWin() {
-        Game game = new Game(10, 10, 1);
-        MatrixTile[][] testMatrix = game.getGameMatrix();
         testMatrix[5][5].open();
         for (MatrixTile mine : game.getMines()) {
             testMatrix[mine.getY()][mine.getX()].setFlag();
@@ -63,8 +63,6 @@ public class LogicTests extends TestFXBase {
 
     @Test
     public void test_gameOverLose() {
-        Game game = new Game(10, 10, 1);
-        MatrixTile[][] testMatrix = game.getGameMatrix();
         testMatrix[0][0].setMine();
         testMatrix[0][0].open();
         assertFalse(game.isVictory());
@@ -74,8 +72,6 @@ public class LogicTests extends TestFXBase {
     public void test_getNeighbors() {
         List<MatrixTile> expected = new ArrayList<>();
         List<MatrixTile> actual;
-        Game game = new Game(10, 10, 10);
-        MatrixTile[][] testMatrix = game.getGameMatrix();
         actual = testMatrix[0][0].getNeighbors(testMatrix);
         expected.add(testMatrix[1][0]);
         expected.add(testMatrix[0][1]);
